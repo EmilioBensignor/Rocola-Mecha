@@ -1,0 +1,6 @@
+allowBuilds:
+  esbuild: true
+  '@parcel/watcher': false
+  sharp: true
+  vue-demi: false
+strictDepBuilds: true
