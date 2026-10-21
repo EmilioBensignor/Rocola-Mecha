@@ -17,7 +17,7 @@
         :key="t.id"
         type="button"
         :aria-label="t.title"
-        class="size-160 absolute top-full left-1/2 rounded-full will-change-transform cursor-pointer"
+        class="size-160 absolute top-full left-1/2 rounded-full cursor-pointer"
         :style="discStyle(i)"
         @click="tap(i)"
       >
@@ -49,7 +49,7 @@
       </button>
       <div
         class="size-0 absolute top-full left-1/2 z-20 pointer-events-none"
-        :style="{ transform: `translateY(${-ARC_RISE * k}px) scale(${k})` }"
+        :style="{ transform: `translateY(${-ARC_RISE * k - rise}px) scale(${k})` }"
       >
         <div
           class="absolute"
@@ -103,6 +103,7 @@ const jukebox = useJukebox()
 
 const viewport = ref(null)
 const k = ref(1)
+const rise = ref(0)
 const spin = ref(0)
 
 const count = jukebox.tracks.length
@@ -130,7 +131,7 @@ function discStyle(i) {
   const rad = angle * Math.PI / 180
   const tilt = Math.max(-14, Math.min(14, velocity.value * -5)) * (1 + a * 0.5)
   return {
-    transform: `translate(calc(-50% + ${ARC_RADIUS * ARC_SPREAD * Math.sin(rad) * k.value}px), calc(-50% - ${(ARC_RISE + Math.max(0, 1 - a) * CENTER_LIFT - ARC_RADIUS * (1 - Math.cos(rad))) * k.value}px)) scale(${(1 - a * 0.05 + Math.max(0, 1 - a) * 0.05) * k.value}) rotate(${angle + tilt}deg)`,
+    transform: `translate(calc(-50% + ${ARC_RADIUS * ARC_SPREAD * Math.sin(rad) * k.value}px), calc(-50% - ${(ARC_RISE + Math.max(0, 1 - a) * CENTER_LIFT - ARC_RADIUS * (1 - Math.cos(rad))) * k.value + rise.value}px)) scale(${(1 - a * 0.05 + Math.max(0, 1 - a) * 0.05) * k.value}) rotate(${angle + tilt}deg)`,
     opacity: Math.abs(d) > 3.2 ? 0 : 1 - a * 0.03,
     zIndex: 10 - Math.round(a * 3),
   }
@@ -182,7 +183,9 @@ let spinSpeed = 0
 onMounted(() => {
   observer = new ResizeObserver(([entry]) => {
     const { width, height } = entry.contentRect
-    if (width && height) k.value = Math.min(width / FIT_WIDTH, height / FIT_HEIGHT)
+    if (!width || !height) return
+    k.value = Math.min(width / FIT_WIDTH, height / FIT_HEIGHT)
+    rise.value = Math.max(0, (height - FIT_HEIGHT * k.value) / 2)
   })
   observer.observe(viewport.value)
   spinFrame = requestAnimationFrame(turn)
