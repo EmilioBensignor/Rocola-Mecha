@@ -14,6 +14,7 @@ export function useSwipe(target, { axis = 'x', friction = 0.95, bounds = null, s
   let frame = null
   let pointer = null
   let wheelTimer = null
+  let wheelTarget = null
 
   const read = e => (axis === 'x' ? e.clientX : e.clientY)
   const range = () => (typeof bounds === 'function' ? bounds() : bounds)
@@ -35,6 +36,7 @@ export function useSwipe(target, { axis = 'x', friction = 0.95, bounds = null, s
   function onDown(e) {
     if (pointer !== null) return
     stop()
+    wheelTarget = null
     pointer = e.pointerId
     start = last = read(e)
     from = pos.value
@@ -97,7 +99,7 @@ export function useSwipe(target, { axis = 'x', friction = 0.95, bounds = null, s
     stop()
     const goal = clamp(dest, false)
     const step = () => {
-      pos.value += (goal - pos.value) * 0.18
+      pos.value += (goal - pos.value) * 0.12
       if (Math.abs(goal - pos.value) > 0.5) {
         frame = requestAnimationFrame(step)
         return
@@ -110,14 +112,15 @@ export function useSwipe(target, { axis = 'x', friction = 0.95, bounds = null, s
 
   function onWheel(e) {
     e.preventDefault()
-    stop()
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY
-    pos.value = clamp(pos.value - delta, true)
-    velocity.value = -delta / 16
+    wheelTarget = clamp((wheelTarget ?? pos.value) - delta, true)
+    velocity.value = velocity.value * 0.8 - (delta / 16) * 0.2
+    goTo(wheelTarget)
     clearTimeout(wheelTimer)
     wheelTimer = setTimeout(() => {
       velocity.value = 0
-      goTo(snap ? snap(pos.value) : pos.value)
+      goTo(snap ? snap(wheelTarget) : wheelTarget)
+      wheelTarget = null
     }, WHEEL_SETTLE)
   }
 

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant short (@media (max-height: 540px));
+
 @theme {
   --color-negro: #070707;
   --color-gris: #141414;
@@ -10,7 +12,6 @@
   --color-magenta: #ff0099;
   --color-violeta: #7c3aed;
   --color-cyan: #22d3ee;
-  --color-naranja: #ff6a00;
 
   --font-display: "Bebas Neue", sans-serif;
   --font-body: "Mozilla Text", sans-serif;
@@ -80,7 +81,7 @@ body {
   to { transform: rotate(360deg); }
 }
 .animate-spin-disc {
-  animation: spin-disc 1.8s linear infinite;
+  animation: spin-disc 2.8s linear infinite;
 }
 
 @keyframes drop {
